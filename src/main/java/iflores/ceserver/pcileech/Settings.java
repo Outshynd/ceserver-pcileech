@@ -23,10 +23,12 @@ public class Settings {
 
     private String _memprocfsExePath;
     private String _pciLeechArguments;
+    private int _portNumber;
 
-    private Settings(String memprocfsExePath, String pciLeechArguments) {
+    private Settings(String memprocfsExePath, String pciLeechArguments, int portNumber) {
         _memprocfsExePath = memprocfsExePath;
         _pciLeechArguments = pciLeechArguments;
+        _portNumber = portNumber;
     }
 
     public static Settings load() {
@@ -34,21 +36,25 @@ public class Settings {
             byte[] settingsBytes = Preferences.userRoot().getByteArray(ROOT_KEY, null);
             String memprocfsExePath;
             String pcileechArguments;
+            int portNumber;
             if (settingsBytes == null) {
                 memprocfsExePath = "";
                 pcileechArguments = "-printf -v -device fpga";
+                portNumber = 52736;
             } else {
                 DataInputStream in = new DataInputStream(new ByteArrayInputStream(settingsBytes));
                 int version = in.readInt();
-                if (version > 0) {
+                if (version > 1) {
                     throw new IllegalArgumentException("I don't know how to handle settings version " + version);
                 }
                 memprocfsExePath = in.readUTF();
                 pcileechArguments = in.readUTF();
+                portNumber = version >= 1 ? in.readInt() : Constants.DEFAULT_PORT_NUMBER;
             }
             return new Settings(
                     memprocfsExePath,
-                    pcileechArguments
+                    pcileechArguments,
+                    portNumber
             );
         } catch (Throwable t) {
             throw new RuntimeException("Unable to read settings", t);
@@ -59,9 +65,10 @@ public class Settings {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream out = new DataOutputStream(baos);
-            out.writeInt(0); // version 0
+            out.writeInt(1); // version 1
             out.writeUTF(_memprocfsExePath);
             out.writeUTF(_pciLeechArguments);
+            out.writeInt(_portNumber);
             Preferences prefRoot = Preferences.userRoot();
             prefRoot.putByteArray(ROOT_KEY, baos.toByteArray());
             try {
@@ -88,6 +95,14 @@ public class Settings {
 
     public void setPciLeechArguments(String pciLeechArguments) {
         _pciLeechArguments = pciLeechArguments;
+    }
+
+    public int getPortNumber() {
+        return _portNumber;
+    }
+
+    public void setPortNumber(int portNumber) {
+        _portNumber = portNumber;
     }
 
 }

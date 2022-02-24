@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static iflores.ceserver.pcileech.Constants.DEFAULT_PORT_NUMBER;
+
 public class MainFrame extends JFrame implements RunningServerListener {
 
     private static final AtomicReference<RunningServer> _server = new AtomicReference<>();
@@ -47,39 +49,48 @@ public class MainFrame extends JFrame implements RunningServerListener {
         add(_settingsPanel, BorderLayout.NORTH);
         JPanel buttonPanel = new JPanel();
         add(buttonPanel, BorderLayout.SOUTH);
-        _settingsPanel.add(
-                new JLabel("MemProcFS.exe Location:"),
-                new GridBagConstraintsBuilder()
-                        .gridx(0)
-                        .anchor(GridBagConstraints.EAST)
-        );
+        GridBagConstraintsBuilder column0 = new GridBagConstraintsBuilder()
+                .gridx(0)
+                .fill(GridBagConstraints.BOTH)
+                .weightx(0.0)
+                .insets(new Insets(2, 2, 2, 2))
+                .anchor(GridBagConstraints.EAST);
+        GridBagConstraintsBuilder column1 = new GridBagConstraintsBuilder()
+                .gridx(1)
+                .fill(GridBagConstraints.BOTH)
+                .weightx(1.0)
+                .insets(new Insets(2, 2, 2, 2))
+                .anchor(GridBagConstraints.WEST);
+
+        _settingsPanel.add(new JLabel("MemProcFS.exe Location:", SwingConstants.RIGHT), column0);
+
         JTextField memprocFsPathTextField = new JTextField(30);
         memprocFsPathTextField.setText(settings.getMemProcFsExePath());
         memprocFsPathTextField.setEditable(false);
-        _settingsPanel.add(
-                memprocFsPathTextField,
-                new GridBagConstraintsBuilder()
-                        .gridx(1)
-                        .insets(new Insets(0, 5, 0, 5))
-                        .weightx(1.0)
-                        .fill(GridBagConstraints.HORIZONTAL)
-        );
         JButton browseButton = new JButton("Browse...");
-        _settingsPanel.add(browseButton, new GridBagConstraintsBuilder().gridx(2));
-        _settingsPanel.add(
-                new JLabel("Arguments to PCILeech:"),
-                new GridBagConstraintsBuilder().gridx(0).anchor(GridBagConstraints.EAST)
-        );
+        JPanel memprocFsPathPanel = new JPanel(new BorderLayout());
+        memprocFsPathPanel.add(memprocFsPathTextField, BorderLayout.CENTER);
+        memprocFsPathPanel.add(browseButton, BorderLayout.EAST);
+        _settingsPanel.add(memprocFsPathPanel, column1);
+
+        _settingsPanel.add(new JLabel("Arguments to PCILeech:", SwingConstants.RIGHT), column0);
+
         JTextField argsTextField = new JTextField(30);
         argsTextField.setText(settings.getPciLeechArguments());
-        _settingsPanel.add(
-                argsTextField,
-                new GridBagConstraintsBuilder()
-                        .gridx(1)
-                        .insets(new Insets(0, 5, 0, 5))
-                        .weightx(1.0)
-                        .fill(GridBagConstraints.HORIZONTAL)
+        _settingsPanel.add(argsTextField, column1);
+
+        _settingsPanel.add(new JLabel("Listen Port:", SwingConstants.RIGHT), column0);
+
+        JSpinner portNumberSpinner = new JSpinner(
+                new SpinnerNumberModel(settings.getPortNumber(), 1, 65535, 1)
         );
+        JPanel portNumberPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        portNumberPanel.add(portNumberSpinner);
+        JLabel portNumberDefaultLabel = new JLabel("(Default is " + DEFAULT_PORT_NUMBER + ")", SwingConstants.LEFT);
+        portNumberDefaultLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
+        portNumberPanel.add(portNumberDefaultLabel);
+        _settingsPanel.add(portNumberPanel, column1);
+
         _startStopButton = new JButton();
         buttonPanel.add(_startStopButton);
 
@@ -108,6 +119,7 @@ public class MainFrame extends JFrame implements RunningServerListener {
                                 "-classpath",
                                 System.getProperty("java.class.path"),
                                 ServerMain.class.getName(),
+                                String.valueOf(settings.getPortNumber()),
                                 settings.getMemProcFsExePath(),
                                 settings.getPciLeechArguments().trim()
                         );
@@ -135,6 +147,11 @@ public class MainFrame extends JFrame implements RunningServerListener {
             settings.setPciLeechArguments(argsTextField.getText());
             settings.save();
         }));
+
+        portNumberSpinner.addChangeListener(e -> {
+            settings.setPortNumber((Integer) portNumberSpinner.getValue());
+            settings.save();
+        });
 
         updateServerState();
         pack();

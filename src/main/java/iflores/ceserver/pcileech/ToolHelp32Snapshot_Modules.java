@@ -10,11 +10,13 @@
 
 package iflores.ceserver.pcileech;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 public class ToolHelp32Snapshot_Modules {
 
-    private static final long MAX_UNSIGNED_INT = 0xffffffffL;
     private final SelectedProcess _selectedProcess;
     private Iterator<MemoryRegion<VadInfo>> _moduleInfoIterator;
 
@@ -31,12 +33,17 @@ public class ToolHelp32Snapshot_Modules {
     }
 
     public void restartModuleInfo() {
-        _moduleInfoIterator =
-                _selectedProcess
-                        .getMemoryMap()
-                        .stream()
-                        .filter(x -> x.getRegionSize() <= MAX_UNSIGNED_INT)
-                        .iterator();
+        List<MemoryRegion<VadInfo>> results = new ArrayList<>();
+        for (MemoryRegion<VadInfo> memoryRegion : _selectedProcess.getMemoryMap()) {
+            VadInfo vadInfo = memoryRegion.getUserObject();
+            if (vadInfo.getfImage() != 0) {
+                results.add(memoryRegion);
+            }
+        }
+        // Move the exe module to the top, since it gets shown as the default by Cheat Engine memory viewer
+        String executableName = Win32Utils.getLastPathComponent(_selectedProcess.getExecutableName());
+        results.sort(Comparator.comparing(x -> ! executableName.equalsIgnoreCase(Win32Utils.getLastPathComponent(x.getUserObject().getName()))));
+        _moduleInfoIterator = results.iterator();
     }
 
 }

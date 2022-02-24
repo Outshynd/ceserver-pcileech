@@ -24,13 +24,13 @@ public class MemoryMap<T> implements Iterable<MemoryRegion<T>> {
         MemoryRegion<T> previousEntry = _treeSet.floor(newEntry);
         MemoryRegion<T> nextEntry = _treeSet.ceiling(newEntry);
         if (regionOverlaps(newEntry, previousEntry)) {
-            throw new RuntimeException("Overlapping entries: " + newEntry + "/" + previousEntry);
+            throw new PciLeechException("Overlapping entries: " + newEntry + "/" + previousEntry);
         }
         if (regionOverlaps(newEntry, nextEntry)) {
-            throw new RuntimeException("Overlapping entries: " + nextEntry + "/" + newEntry);
+            throw new PciLeechException("Overlapping entries: " + nextEntry + "/" + newEntry);
         }
         if (!_treeSet.add(newEntry)) {
-            throw new RuntimeException("Duplicate memory range: " + newEntry);
+            throw new PciLeechException("Duplicate memory range: " + newEntry);
         }
     }
 
@@ -81,6 +81,11 @@ public class MemoryMap<T> implements Iterable<MemoryRegion<T>> {
 
     public int getRegionCount() {
         return _treeSet.size();
+    }
+
+    @Override
+    public String toString() {
+        return "[" + _treeSet.size() + " memory regions]";
     }
 
 }

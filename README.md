@@ -12,6 +12,8 @@ All Cheat Engine functions may not be available. Currently implemented is the ab
 * Search Memory
 * Browse Memory
 * View Module Listing
+* Generate Pointer Map
+* Pointer Scan
 
 Other functions may or may not work (likely the latter).
 

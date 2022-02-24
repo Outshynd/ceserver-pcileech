@@ -19,4 +19,14 @@ public class Win32Utils {
         throw new Win32Exception(Kernel32.INSTANCE.GetLastError());
     }
 
+    public static String getLastPathComponent(String path) {
+        if (path == null) {
+            return null;
+        }
+        int idx = path.lastIndexOf('\\');
+        if (idx >= 0) {
+            path = path.substring(idx + 1);
+        }
+        return path;
+    }
 }

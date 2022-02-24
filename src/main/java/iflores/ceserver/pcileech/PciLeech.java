@@ -15,7 +15,9 @@ import com.sun.jna.Pointer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class PciLeech {
 
@@ -70,32 +72,14 @@ public class PciLeech {
         try {
             Pointer pcbVadMap = new Pointer(pcbVadMap_malloc);
             pcbVadMap.clear(4);
-            if (
-                    !_jnaPciLeech.VMMDLL_Map_GetVadW(
-                            pid,
-                            null,
-                            pcbVadMap,
-                            identifyModules
-                    )
-            ) {
-                throw new PciLeechException();
-            }
+            retry(() -> _jnaPciLeech.VMMDLL_Map_GetVadW(pid, null, pcbVadMap, identifyModules));
             int bufferSize = pcbVadMap.getInt(0);
             long pVadMap_malloc = Native.malloc(bufferSize);
             try {
                 Pointer pVadMap = new Pointer(pVadMap_malloc);
                 pVadMap.clear(bufferSize);
                 VMMDLL_MAP_VAD map = new VMMDLL_MAP_VAD(pVadMap);
-                if (
-                        !_jnaPciLeech.VMMDLL_Map_GetVadW(
-                                pid,
-                                map,
-                                pcbVadMap,
-                                identifyModules
-                        )
-                ) {
-                    throw new PciLeechException();
-                }
+                retry(() -> _jnaPciLeech.VMMDLL_Map_GetVadW(pid, map, pcbVadMap, identifyModules));
                 List<VadInfo> vadInfos = new ArrayList<>();
                 VMMDLL_MAP_VADENTRY[] entries = (VMMDLL_MAP_VADENTRY[]) map.pMapArray.toArray(map.cMap);
                 for (VMMDLL_MAP_VADENTRY entry : entries) {
@@ -114,6 +98,41 @@ public class PciLeech {
             }
         } finally {
             Native.free(pcbVadMap_malloc);
+        }
+    }
+
+    private static void retry(Supplier<Boolean> function) {
+        boolean printedMessage = false;
+        long startTime = System.currentTimeMillis();
+        long nextStatusMessage = System.currentTimeMillis() + 5000;
+        while (true) {
+            try {
+                if (function.get()) {
+                    if (printedMessage) {
+                        System.out.println(new Date() + ": Operation finally succeeded.");
+                    }
+                    return;
+                }
+            }
+            catch (Throwable t) {
+                // ignore, retry
+            }
+            long now = System.currentTimeMillis();
+            if (now > startTime + 60000) {
+                System.out.println(new Date() + ": Operation keeps failing. Giving up.");
+                throw new PciLeechException("Operation keeps failing. Giving up.");
+            }
+            if (now > nextStatusMessage) {
+                nextStatusMessage = now + 5000;
+                System.out.println(new Date() + ": Operation keeps failing. Will keep retrying for up to 60 seconds...");
+                printedMessage = true;
+            }
+            try {
+                //noinspection BusyWait
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

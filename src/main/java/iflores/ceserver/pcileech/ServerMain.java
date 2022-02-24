@@ -22,15 +22,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ServerMain {
-
-    public static final int DEFAULT_PORT_NUMBER = 52736;
-
+    
     public static void main(String[] args) {
         try {
-            if (args.length != 2) {
-                System.err.println("ERROR: Expected 2 command line arguments");
+            if (args.length != 3) {
+                System.err.println("ERROR: Expected 3 command line arguments");
                 System.exit(-1);
             }
+            int port = Integer.parseInt(args[0]);
             // start thread that ends the process on any input from parent process
             new Thread(() -> {
                 try {
@@ -42,14 +41,14 @@ public class ServerMain {
                     System.exit(0);
                 }
             }).start();
-            File jnaLibraryPath = new File(args[0]);
+            File jnaLibraryPath = new File(args[1]);
             if (!jnaLibraryPath.exists()) {
-                throw new FileNotFoundException("JNA Library Path does not exist: '" + args[0] + "'");
+                throw new FileNotFoundException("JNA Library Path does not exist: '" + jnaLibraryPath + "'");
             }
             try {
                 List<String> pciLeechArgs = new ArrayList<>();
                 pciLeechArgs.add("");
-                pciLeechArgs.addAll(Arrays.asList(args[1].split(" +")));
+                pciLeechArgs.addAll(Arrays.asList(args[2].split(" +")));
                 System.setProperty("jna.library.path", jnaLibraryPath.getParent());
                 int numTries = 0;
                 while (true) {
@@ -65,7 +64,7 @@ public class ServerMain {
                     }
                 }
                 System.out.println("PCILeech Initialization Complete.");
-                runServer();
+                runServer(port);
             } catch (UnsatisfiedLinkError ex) {
                 throw new PciLeechException("Unable to load PCILeech's VMM DLL.\nCheck MemProcFS location.", ex);
             }
@@ -76,9 +75,8 @@ public class ServerMain {
         }
     }
 
-    private static void runServer() throws IOException {
+    private static void runServer(int port) throws IOException {
         ServerSocketChannel ss = ServerSocketChannel.open();
-        int port = DEFAULT_PORT_NUMBER;
         try {
             ss.bind(new InetSocketAddress(port));
         } catch (BindException ex) {

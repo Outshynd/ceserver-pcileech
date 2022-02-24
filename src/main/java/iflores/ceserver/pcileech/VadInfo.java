@@ -130,4 +130,36 @@ public class VadInfo implements Serializable {
     public int getType() {
         return _type;
     }
+
+    public int getWin32Type() {
+        return switch (_type) {
+            case 2 -> Win32Constants.TYPE_MEM_IMAGE;
+            case 1 -> Win32Constants.TYPE_MEM_MAPPED;
+            default -> Win32Constants.TYPE_MEM_PRIVATE;
+        };
+    }
+
+    public int getWin32Protection() {
+        return Win32Constants.PAGE_READWRITE;
+        /*
+        0  	MM_ZERO_ACCESS
+        1	MM_READONLY
+        2	MM_EXECUTE
+        3	MM_EXECUTE_READ
+        4  	MM_READWRITE
+        5	MM_WRITECOPY
+        6	MM_EXECUTE_READWRITE
+        7	MM_EXECUTE_WRITECOPY
+        */
+//        switch (_protection) {
+//            case 1: return Win32Constants.PAGE_READONLY;
+//            case 2: return Win32Constants.PAGE_EXECUTE;
+//            case 3: return Win32Constants.PAGE_EXECUTE_READ;
+//            case 4: return Win32Constants.PAGE_READWRITE;
+//            case 5: return Win32Constants.PAGE_WRITECOPY;
+//            case 6: return Win32Constants.PAGE_EXECUTE_READWRITE;
+//            case 7: return Win32Constants.PAGE_EXECUTE_WRITECOPY;
+//            default: return Win32Constants.PAGE_NOACCESS;
+//        }
+    }
 }

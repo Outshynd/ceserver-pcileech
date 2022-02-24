@@ -131,10 +131,12 @@ public class ClientHandler extends Thread {
                     if (command == CMD_PROCESS32FIRST) {
                         snapshot.restartProcessInfo();
                     }
-                    if (snapshot.hasNextProcessInfo()) {
+                    while (snapshot.hasNextProcessInfo()) {
                         ProcessInfo processInfo = snapshot.nextProcessInfo();
-                        writeCeProcessEntry(true, processInfo.getPid(), processInfo.getName());
-                        return;
+                        if (processInfo.getName() != null && ! processInfo.getName().isEmpty()) {
+                            writeCeProcessEntry(true, processInfo.getPid(), processInfo.getName());
+                            return;
+                        }
                     }
                 }
                 writeCeProcessEntry(false, 0, "");
@@ -243,11 +245,8 @@ public class ClientHandler extends Thread {
                     if (command == CMD_MODULE32FIRST) {
                         toolHelp32SnapshotModules.restartModuleInfo();
                     }
-                    while (toolHelp32SnapshotModules.hasNextModuleInfo()) {
+                    if (toolHelp32SnapshotModules.hasNextModuleInfo()) {
                         MemoryRegion<VadInfo> memoryRegion = toolHelp32SnapshotModules.nextModuleInfo();
-                        if (memoryRegion.getUserObject().getfFile() == 0) {
-                            continue;
-                        }
                         writeCeModuleEntry(
                                 true,
                                 memoryRegion.getRegionStart(),
@@ -257,7 +256,6 @@ public class ClientHandler extends Thread {
                         return;
                     }
                 }
-                System.out.println("End of modules");
                 writeCeModuleEntry(false, 0L, 0L, "");
             }
             case CMD_GETSYMBOLLISTFROMFILE -> {
@@ -285,8 +283,8 @@ public class ClientHandler extends Thread {
                         VadInfo vadInfo = memoryRange.getUserObject();
                         name = vadInfo == null ? "" : vadInfo.getName();
                         response.put((byte) 1); // result
-                        response.putInt(vadInfo == null ? 1 : vadInfo.getProtection()); // protection
-                        response.putInt(vadInfo == null ? 0 : vadInfo.getType()); // type
+                        response.putInt(vadInfo == null ? 1 : vadInfo.getWin32Protection());
+                        response.putInt(vadInfo == null ? 0 : vadInfo.getWin32Type());
                         response.putLong(rangeStart); // base address
                         response.putLong(rangeEnd - rangeStart + 1); // size
                         response.flip();
@@ -318,8 +316,8 @@ public class ClientHandler extends Thread {
                 for (MemoryRegion<VadInfo> memoryRegion : memoryMap) {
                     response.putLong(memoryRegion.getRegionStart());
                     response.putLong(memoryRegion.getRegionSize());
-                    response.putInt(memoryRegion.getUserObject().getProtection()); // protection
-                    response.putInt(memoryRegion.getUserObject().getType()); // type
+                    response.putInt(memoryRegion.getUserObject().getWin32Protection());
+                    response.putInt(memoryRegion.getUserObject().getWin32Type());
                 }
                 if (response.hasRemaining()) {
                     throw new IllegalStateException();
@@ -387,9 +385,7 @@ public class ClientHandler extends Thread {
     }
 
     private void writeCeProcessEntry(boolean hasNext, int pid, String processName) throws IOException {
-        if (processName == null) {
-            processName = "";
-        }
+        processName = Win32Utils.getLastPathComponent(processName);
         byte[] processNameBytes = processName.getBytes(StandardCharsets.UTF_8);
         ByteBuffer buf = ByteBuffer.allocate(12 + processNameBytes.length);
         buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -405,10 +401,7 @@ public class ClientHandler extends Thread {
         if (moduleName == null) {
             moduleName = "";
         }
-        int idx = moduleName.lastIndexOf('\\');
-        if (idx >= 0) {
-            moduleName = moduleName.substring(idx + 1);
-        }
+        moduleName = Win32Utils.getLastPathComponent(moduleName);
         if (moduleSize > 0xffffffffL) {
             throw new IllegalArgumentException();
         }

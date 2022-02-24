@@ -19,6 +19,11 @@ public class GridBagConstraintsBuilder extends GridBagConstraints {
         return this;
     }
 
+    public GridBagConstraintsBuilder gridwidth(int gridwidth) {
+        this.gridwidth = gridwidth;
+        return this;
+    }
+
     public GridBagConstraintsBuilder anchor(int anchor) {
         this.anchor = anchor;
         return this;
@@ -36,6 +41,16 @@ public class GridBagConstraintsBuilder extends GridBagConstraints {
 
     public GridBagConstraintsBuilder fill(int fill) {
         this.fill = fill;
+        return this;
+    }
+
+    public GridBagConstraintsBuilder ipadx(int ipadx) {
+        this.ipadx = ipadx;
+        return this;
+    }
+
+    public GridBagConstraintsBuilder ipady(int ipady) {
+        this.ipady = ipady;
         return this;
     }
 

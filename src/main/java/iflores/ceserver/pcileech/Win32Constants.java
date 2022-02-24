@@ -15,8 +15,10 @@ interface Win32Constants {
     int TH32CS_SNAPPROCESS = 0x02;
     int TH32CS_SNAPTHREAD = 0x04;
     int TH32CS_SNAPMODULE = 0x08;
+
+    int TYPE_MEM_IMAGE = 0x1000000;
     int TYPE_MEM_MAPPED = 0x40000;
-    int TYPE_MEM_ = 0x20000;
+    int TYPE_MEM_PRIVATE = 0x20000;
     int TYPE_MEM_COMMIT = 0x1000;
     int TYPE_MEM_FREE = 0x10000;
 

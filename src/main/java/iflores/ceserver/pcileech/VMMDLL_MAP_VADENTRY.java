@@ -13,9 +13,6 @@ package iflores.ceserver.pcileech;
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Structure.FieldOrder({
         "vaStart",
         "vaEnd",

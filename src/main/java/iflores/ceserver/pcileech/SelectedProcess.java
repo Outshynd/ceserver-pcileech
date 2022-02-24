@@ -24,16 +24,21 @@ public class SelectedProcess {
     }
 
     public byte[] readMemory(long address, int size) {
-        return PciLeech.readMemory(
-                _pid,
-                address,
-                size,
-                VmmDllFlags.NOCACHE,
-                VmmDllFlags.NOCACHEPUT,
-                VmmDllFlags.NO_PREDICTIVE_READ,
-                VmmDllFlags.NOPAGING,
-                VmmDllFlags.NOPAGING_IO
-        );
+        try {
+            return PciLeech.readMemory(
+                    _pid,
+                    address,
+                    size,
+                    VmmDllFlags.NOCACHE,
+                    VmmDllFlags.NOCACHEPUT,
+                    VmmDllFlags.NO_PREDICTIVE_READ,
+                    VmmDllFlags.NOPAGING,
+                    VmmDllFlags.NOPAGING_IO
+            );
+        }
+        catch (PciLeechException ex) {
+            return new byte[0];
+        }
     }
 
     public void writeMemory(long address, byte[] bytes) {
@@ -56,17 +61,27 @@ public class SelectedProcess {
             for (VadInfo vadInfo : vadInfos) {
                 long regionSize = vadInfo.getEnd() - vadInfo.getStart() + 1;
                 if (regionSize < Integer.MAX_VALUE) {
-                    memoryMap.add(
-                            new MemoryRegion<>(
-                                    vadInfo,
-                                    vadInfo.getStart(),
-                                    regionSize
-                            )
-                    );
+                    try {
+                        memoryMap.add(
+                                new MemoryRegion<>(
+                                        vadInfo,
+                                        vadInfo.getStart(),
+                                        regionSize
+                                )
+                        );
+                    }
+                    catch (PciLeechException ex) {
+                        System.err.println("ERROR: " + ex.getMessage());
+                    }
                 }
             }
             _memoryMap = memoryMap;
         }
         return _memoryMap;
     }
+
+    public String getExecutableName() {
+        return _executableName;
+    }
+
 }

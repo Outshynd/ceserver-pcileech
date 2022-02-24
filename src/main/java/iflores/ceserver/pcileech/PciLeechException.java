@@ -23,4 +23,7 @@ public class PciLeechException extends RuntimeException {
         super(message, cause);
     }
 
+    public PciLeechException(Throwable cause) {
+        super(cause);
+    }
 }

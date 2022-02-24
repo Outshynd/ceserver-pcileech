@@ -47,7 +47,7 @@ public class MemoryRegion<T> implements Comparable<MemoryRegion<T>> {
 
     @Override
     public String toString() {
-        return "[start=" + Long.toHexString(_regionStart) + ", size=" + _size + "]";
+        return "[start=" + Long.toHexString(_regionStart) + ", size=" + _size + "] " + _userObject;
     }
 
 }
