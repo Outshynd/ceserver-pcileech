@@ -104,7 +104,7 @@ public class ClientHandler extends Thread {
 
     private void handleCommand(byte command) throws IOException {
         switch (command) {
-            case CMD_CREATETOOLHELP32SNAPSHOT -> {
+            case CMD_CREATETOOLHELP32SNAPSHOT: {
                 int dwFlags = readInt();
                 int th32ProcessID = readInt();
                 int handleId;
@@ -123,8 +123,10 @@ public class ClientHandler extends Thread {
                 result.order(ByteOrder.LITTLE_ENDIAN);
                 result.putInt(0, handleId);
                 writeFully(result);
+                break;
             }
-            case CMD_PROCESS32FIRST, CMD_PROCESS32NEXT -> {
+            case CMD_PROCESS32FIRST:
+            case CMD_PROCESS32NEXT: {
                 int handleId = readInt();
                 ToolHelp32Snapshot_Processes snapshot = (ToolHelp32Snapshot_Processes) getHandle(handleId);
                 if (snapshot != null) {
@@ -133,15 +135,16 @@ public class ClientHandler extends Thread {
                     }
                     while (snapshot.hasNextProcessInfo()) {
                         ProcessInfo processInfo = snapshot.nextProcessInfo();
-                        if (processInfo.getName() != null && ! processInfo.getName().isEmpty()) {
+                        if (processInfo.getName() != null && !processInfo.getName().isEmpty()) {
                             writeCeProcessEntry(true, processInfo.getPid(), processInfo.getName());
                             return;
                         }
                     }
                 }
                 writeCeProcessEntry(false, 0, "");
+                break;
             }
-            case CMD_CLOSEHANDLE -> {
+            case CMD_CLOSEHANDLE: {
                 _handleLock.lock();
                 try {
                     int handleId = readInt();
@@ -154,8 +157,9 @@ public class ClientHandler extends Thread {
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 buf.putInt(0, 1);
                 writeFully(buf);
+                break;
             }
-            case CMD_OPENPROCESS -> {
+            case CMD_OPENPROCESS: {
                 int pid = readInt();
                 int handleId = 0;
                 try {
@@ -174,8 +178,9 @@ public class ClientHandler extends Thread {
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 buf.putInt(0, handleId);
                 writeFully(buf);
+                break;
             }
-            case CMD_READPROCESSMEMORY -> {
+            case CMD_READPROCESSMEMORY: {
                 ByteBuffer buf = ByteBuffer.allocate(17);
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 readFully(buf);
@@ -202,8 +207,9 @@ public class ClientHandler extends Thread {
                     memoryBuf.flip();
                     writeFully(memoryBuf);
                 }
+                break;
             }
-            case CMD_WRITEPROCESSMEMORY -> {
+            case CMD_WRITEPROCESSMEMORY: {
                 ByteBuffer buf = ByteBuffer.allocate(16);
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 readFully(buf);
@@ -221,24 +227,41 @@ public class ClientHandler extends Thread {
                 responseBuffer.order(ByteOrder.LITTLE_ENDIAN);
                 responseBuffer.putInt(0, 0);
                 writeFully(responseBuffer);
+                break;
             }
-            case CMD_GETARCHITECTURE -> {
+            case CMD_GETARCHITECTURE: {
                 WinBase.SYSTEM_INFO si = new WinBase.SYSTEM_INFO();
                 Kernel32.INSTANCE.GetSystemInfo(si);
                 int architecture = si.processorArchitecture.pi.wProcessorArchitecture.intValue();
-                byte result = (byte) switch (architecture) {
-                    case 0 -> 0; // x86
-                    case 9 -> 1; // x64 (AMD or Intel)
-                    case 5 -> 2; // ARM
-                    case 12 -> 3; // ARM64
-                    default -> throw new RuntimeException("Unsupported architecture: #" + architecture);
-                };
+                byte result;
+                switch (architecture) {
+                    case 0:
+                        // x86
+                        result = 0;
+                        break;
+                    case 9:
+                        // x64 (AMD or Intel)
+                        result = 1;
+                        break;
+                    case 5:
+                        // ARM
+                        result = 2;
+                        break;
+                    case 12:
+                        // ARM64
+                        result = 3;
+                        break;
+                    default:
+                        throw new RuntimeException("Unsupported architecture: #" + architecture);
+                }
                 ByteBuffer buf = ByteBuffer.allocate(1);
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 buf.put(0, result);
                 writeFully(buf);
+                break;
             }
-            case CMD_MODULE32FIRST, CMD_MODULE32NEXT -> {
+            case CMD_MODULE32FIRST:
+            case CMD_MODULE32NEXT: {
                 int handleId = readInt();
                 ToolHelp32Snapshot_Modules toolHelp32SnapshotModules = (ToolHelp32Snapshot_Modules) getHandle(handleId);
                 if (toolHelp32SnapshotModules != null) {
@@ -257,16 +280,19 @@ public class ClientHandler extends Thread {
                     }
                 }
                 writeCeModuleEntry(false, 0L, 0L, "");
+                break;
             }
-            case CMD_GETSYMBOLLISTFROMFILE -> {
+            case CMD_GETSYMBOLLISTFROMFILE: {
                 int symbolPathSize = readInt();
                 ByteBuffer buf = ByteBuffer.allocate(symbolPathSize);
                 readFully(buf);
                 ByteBuffer response = ByteBuffer.allocate(4);
                 response.order(ByteOrder.LITTLE_ENDIAN);
                 writeFully(response);
+                break;
             }
-            case CMD_VIRTUALQUERYEX, CMD_GETREGIONINFO -> {
+            case CMD_VIRTUALQUERYEX:
+            case CMD_GETREGIONINFO: {
                 int handleId = readInt();
                 long address = readLong();
                 SelectedProcess selectedProcess = (SelectedProcess) getHandle(handleId);
@@ -304,9 +330,11 @@ public class ClientHandler extends Thread {
                     buf.flip();
                     writeFully(buf);
                 }
+                break;
             }
-            case CMD_VIRTUALQUERYEXFULL -> {
+            case CMD_VIRTUALQUERYEXFULL: {
                 int handleId = readInt();
+                @SuppressWarnings("unused")
                 byte flags = readByte();
                 SelectedProcess selectedProcess = (SelectedProcess) getHandle(handleId);
                 MemoryMap<VadInfo> memoryMap = selectedProcess.getMemoryMap();
@@ -324,8 +352,10 @@ public class ClientHandler extends Thread {
                 }
                 response.flip();
                 writeFully(response);
+                break;
             }
-            default -> throw new RuntimeException("Got unknown command: " + command);
+            default:
+                throw new RuntimeException("Got unknown command: " + command);
         }
     }
 

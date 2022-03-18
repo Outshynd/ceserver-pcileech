@@ -132,11 +132,14 @@ public class VadInfo implements Serializable {
     }
 
     public int getWin32Type() {
-        return switch (_type) {
-            case 2 -> Win32Constants.TYPE_MEM_IMAGE;
-            case 1 -> Win32Constants.TYPE_MEM_MAPPED;
-            default -> Win32Constants.TYPE_MEM_PRIVATE;
-        };
+        switch (_type) {
+            case 2:
+                return Win32Constants.TYPE_MEM_IMAGE;
+            case 1:
+                return Win32Constants.TYPE_MEM_MAPPED;
+            default:
+                return Win32Constants.TYPE_MEM_PRIVATE;
+        }
     }
 
     public int getWin32Protection() {
