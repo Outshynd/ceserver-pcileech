@@ -25,39 +25,23 @@ Other functions may or may not work (likely the latter).
 # Prerequisites
 
 * Two machines running Windows
-* [MemProcFS](https://github.com/ufrisk/MemProcFS) running on the source machine (part of the PCILeech ecosystem by Ulf Frisk)
+* [MemProcFS](https://github.com/ufrisk/MemProcFS) running on the source machine (part of the PCILeech ecosystem by Ulf
+  Frisk)
 * Additional requirements, including possibly the purchase of a hardware FPGA card if you choose to go that route. See
   the [PCILeech documentation](https://github.com/ufrisk/pcileech/blob/master/readme.md) for your particular use case.
 
-# Installation Option #1 - Downloading the Binary
+# Installation
 
-It is *recommended* that you build ceserver-pcileech yourself from its source code:
-
-1. Download and install [Temurin 17](https://adoptium.net/?variant=openjdk17) (Any other Java 17+ is fine too)
-2. Download [the latest ceserver-pcileech.jar](https://github.com/isabellaflores/ceserver-pcileech/releases) from Github
-3. Copy the downloaded ceserver-pcileech.jar file to your Desktop
-4. Continue with "Running the Server" section below
-
-# Installation Option #2 - Building from Source
-
-It is *recommended* that you build ceserver-pcileech yourself from its source code:
-
-1. Download and install [Temurin 17](https://adoptium.net/?variant=openjdk17) (Any other Java 17+ is fine too)
-2. Download and install [Apache Maven](https://www.youtube.com/watch?v=--Iv5vBIHjI)
-3. Download [the latest source code](https://github.com/isabellaflores/ceserver-pcileech/releases) from Github
-4. Unzip the source code to any desired location
-5. Build it using Maven by typing "mvn package" in the source code directory
-6. Copy the ceserver-pcileech.jar file from the 'target' directory to your Desktop
-7. Continue with "Running the Server" section below
+1. Download [the latest ceserver-pcileech.msi](https://github.com/isabellaflores/ceserver-pcileech/releases) from Github
+2. Run the installation package, and follow the instructions
+3. Continue with "Running the Server" section below
 
 # Running the Server
 
-1. Open a command prompt (Win+R then type "cmd")
-2. Type "cd Desktop"
-3. Type "java -jar ceserver-pcileech.jar"
+1. Double-click the ceserver-pcileech icon created by the installer
 4. Configure the server in the window that appears
 5. Press the "Start Server" button
-6. The server will now be listening on the default port, 52736.
+6. The server will now be listening on the default port, 52736
 
 # Connecting to the server
 
