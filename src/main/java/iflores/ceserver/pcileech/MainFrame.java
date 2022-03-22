@@ -10,12 +10,21 @@
 
 package iflores.ceserver.pcileech;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static iflores.ceserver.pcileech.Constants.DEFAULT_PORT_NUMBER;
@@ -49,6 +58,25 @@ public class MainFrame extends JFrame implements RunningServerListener {
         add(_settingsPanel, BorderLayout.NORTH);
         JPanel buttonPanel = new JPanel();
         add(buttonPanel, BorderLayout.SOUTH);
+        try {
+            URL resource = MainFrame.class.getClassLoader().getResource("vamos.gif");
+            ImageIcon imageIcon = new ImageIcon(Objects.requireNonNull(resource));
+            JLabel label = new JLabel(imageIcon);
+            add(label, BorderLayout.EAST);
+            label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        openWebpage(new URL("https://github.com/isabellaflores/vamos/blob/master/README.md"));
+                    } catch (MalformedURLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
         GridBagConstraintsBuilder column0 = new GridBagConstraintsBuilder()
                 .gridx(0)
                 .fill(GridBagConstraints.BOTH)
@@ -220,5 +248,27 @@ public class MainFrame extends JFrame implements RunningServerListener {
         }
         updateServerState();
         _startStopButton.setEnabled(true);
+    }
+
+    public static boolean openWebpage(URI uri) {
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(uri);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static boolean openWebpage(URL url) {
+        try {
+            return openWebpage(url.toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
