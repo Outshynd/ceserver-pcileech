@@ -1,5 +1,4 @@
-set JAVA_HOME=C:\Users\iflores\.jdks\temurin-17.0.2
-set PATH=%JAVA_HOME%\bin;c:\windows;c:\windows\system32;C:\Users\iflores\.apps\apache-maven-3.8.4\bin
+call env.cmd
 rd /q /s ..\target
 mkdir ..\target || goto :EOF
 call mvn -e -f ../pom.xml package || goto :EOF
