@@ -233,27 +233,21 @@ public class ClientHandler extends Thread {
                 WinBase.SYSTEM_INFO si = new WinBase.SYSTEM_INFO();
                 Kernel32.INSTANCE.GetSystemInfo(si);
                 int architecture = si.processorArchitecture.pi.wProcessorArchitecture.intValue();
-                byte result;
-                switch (architecture) {
-                    case 0:
-                        // x86
-                        result = 0;
-                        break;
-                    case 9:
-                        // x64 (AMD or Intel)
-                        result = 1;
-                        break;
-                    case 5:
-                        // ARM
-                        result = 2;
-                        break;
-                    case 12:
-                        // ARM64
-                        result = 3;
-                        break;
-                    default:
-                        throw new RuntimeException("Unsupported architecture: #" + architecture);
-                }
+                byte result = switch (architecture) {
+                    case 0 ->
+                            // x86
+                            0;
+                    case 9 ->
+                            // x64 (AMD or Intel)
+                            1;
+                    case 5 ->
+                            // ARM
+                            2;
+                    case 12 ->
+                            // ARM64
+                            3;
+                    default -> throw new RuntimeException("Unsupported architecture: #" + architecture);
+                };
                 ByteBuffer buf = ByteBuffer.allocate(1);
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 buf.put(0, result);

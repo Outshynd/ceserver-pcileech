@@ -24,7 +24,7 @@ public class Main {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     public static void main(String[] args) {
-        maybeRerunAsAdministrator(args);
+//        maybeRerunAsAdministrator(args);
         Settings settings = Settings.load();
         SwingUtilities.invokeLater(
                 () -> {
