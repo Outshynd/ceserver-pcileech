@@ -58,3 +58,5 @@ Thank you for your interest in contributing to ceserver-pcileech!
 To submit your changes to me, please [create a pull request](https://github.com/isabellaflores/ceserver-pcileech/pulls),
 and I will personally review your submission. If it is accepted, you will receive credit for your submission. If you'd
 like your submission to be anonymous or pseudonymous, please let me know.
+
+You can also email me at [isabella99flores@gmail.com](mailto:isabella99flores@gmail.com)
