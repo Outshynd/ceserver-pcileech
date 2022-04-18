@@ -56,13 +56,16 @@ public class MainFrame extends JFrame implements RunningServerListener {
         _settingsPanel = new JPanel(new GridBagLayout());
         _settingsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(_settingsPanel, BorderLayout.NORTH);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel buttonPanel = new JPanel();
-        add(buttonPanel, BorderLayout.SOUTH);
+        bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
         try {
-            URL resource = MainFrame.class.getClassLoader().getResource("vamos.gif");
-            ImageIcon imageIcon = new ImageIcon(Objects.requireNonNull(resource));
-            JLabel label = new JLabel(imageIcon);
-            add(label, BorderLayout.EAST);
+            JLabel label = new JLabel("<html>If you like this software, <a href=''><font color='blue'>you should take a look at our other project</font></a>, Vamos!</html>");
+//            label.setForeground(Color.BLUE);
+            label.setFont(new Font(Font.SERIF, Font.BOLD, 14));
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+            bottomPanel.add(label, BorderLayout.NORTH);
             label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             label.addMouseListener(new MouseAdapter() {
                 @Override
@@ -182,7 +185,7 @@ public class MainFrame extends JFrame implements RunningServerListener {
         });
 
         updateServerState();
-        pack();
+        setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
     }
 
