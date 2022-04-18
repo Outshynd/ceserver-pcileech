@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -158,7 +159,9 @@ public class MainFrame extends JFrame implements RunningServerListener {
         updateServerState();
         setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
-        startServer(settings);
+        if (settings.getMemProcFsExePath() != null && ! settings.getMemProcFsExePath().isEmpty()) {
+            startServer(settings);
+        }
     }
 
     private void startServer(Settings settings) {

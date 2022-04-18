@@ -41,6 +41,9 @@ public class ServerMain {
                     System.exit(0);
                 }
             }).start();
+            if (args[1].isEmpty()) {
+                throw new RuntimeException("MemProcFS.exe location not specified. Please check settings and try again.");
+            }
             File jnaLibraryPath = new File(args[1]);
             if (!jnaLibraryPath.exists()) {
                 throw new FileNotFoundException("JNA Library Path does not exist: '" + jnaLibraryPath + "'");
