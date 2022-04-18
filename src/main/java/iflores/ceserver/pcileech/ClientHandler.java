@@ -104,6 +104,17 @@ public class ClientHandler extends Thread {
 
     private void handleCommand(byte command) throws IOException {
         switch (command) {
+            case CMD_GETVERSION: {
+                String versionString = "CHEATENGINE Network 2.1";
+                byte[] versionBytes = versionString.getBytes(StandardCharsets.UTF_8);
+                ByteBuffer result = ByteBuffer.allocate(5 + versionBytes.length);
+                result.order(ByteOrder.LITTLE_ENDIAN);
+                result.putInt(0, 2);
+                result.put(4, (byte) versionBytes.length);
+                result.put(5, versionBytes);
+                writeFully(result);
+                break;
+            }
             case CMD_CREATETOOLHELP32SNAPSHOT: {
                 int dwFlags = readInt();
                 int th32ProcessID = readInt();

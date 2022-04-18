@@ -12,7 +12,7 @@ package iflores.ceserver.pcileech;
 
 public interface CommandConstants {
 
-//    byte CMD_GETVERSION = 0;
+    byte CMD_GETVERSION = 0;
 //    byte CMD_CLOSECONNECTION = 1;
 //    byte CMD_TERMINATESERVER = 2;
     byte CMD_OPENPROCESS = 3;
