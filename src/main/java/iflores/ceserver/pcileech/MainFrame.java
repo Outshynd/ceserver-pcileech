@@ -63,7 +63,7 @@ public class MainFrame extends JFrame implements RunningServerListener {
         try {
             JLabel label = new JLabel("<html>If you like this software, <a href=''><font color='blue'>you should take a look at our other project</font></a>, Vamos!</html>");
 //            label.setForeground(Color.BLUE);
-            label.setFont(new Font(Font.SERIF, Font.BOLD, 14));
+            label.setFont(new Font(Font.SERIF, Font.BOLD, 18));
             label.setHorizontalAlignment(SwingConstants.CENTER);
             bottomPanel.add(label, BorderLayout.NORTH);
             label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -123,6 +123,8 @@ public class MainFrame extends JFrame implements RunningServerListener {
         _settingsPanel.add(portNumberPanel, column1);
 
         _startStopButton = new JButton();
+        _startStopButton.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        _startStopButton.setFocusable(false);
         buttonPanel.add(_startStopButton);
 
         _outputArea = new JTextArea(10, 30);
@@ -140,38 +142,7 @@ public class MainFrame extends JFrame implements RunningServerListener {
         });
 
         _startStopButton.addActionListener(
-                e -> {
-                    RunningServer server = _server.get();
-                    if (server == null) {
-                        _outputArea.setText("");
-                        _startStopButton.setText("Stop Server");
-                        ProcessBuilder pb = new ProcessBuilder(
-                                System.getProperty("java.home") + "\\bin\\java.exe",
-                                "-classpath",
-                                System.getProperty("java.class.path"),
-                                ServerMain.class.getName(),
-                                String.valueOf(settings.getPortNumber()),
-                                settings.getMemProcFsExePath(),
-                                settings.getPciLeechArguments().trim()
-                        );
-                        pb.redirectInput(ProcessBuilder.Redirect.PIPE);
-                        pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
-                        pb.redirectErrorStream(true);
-                        try {
-                            Process p = pb.start();
-                            server = new RunningServer(p);
-                            _server.set(server);
-                            server.addListener(this);
-                            server.start();
-                            updateServerState();
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    } else {
-                        server.shutdownNow();
-                        _startStopButton.setEnabled(false);
-                    }
-                }
+                e -> startServer(settings)
         );
 
         argsTextField.getDocument().addDocumentListener(new DocumentChangeListener(() -> {
@@ -187,6 +158,40 @@ public class MainFrame extends JFrame implements RunningServerListener {
         updateServerState();
         setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
+        startServer(settings);
+    }
+
+    private void startServer(Settings settings) {
+        RunningServer server = _server.get();
+        if (server == null) {
+            _outputArea.setText("");
+            _startStopButton.setText("Stop Server");
+            ProcessBuilder pb = new ProcessBuilder(
+                    System.getProperty("java.home") + "\\bin\\java.exe",
+                    "-classpath",
+                    System.getProperty("java.class.path"),
+                    ServerMain.class.getName(),
+                    String.valueOf(settings.getPortNumber()),
+                    settings.getMemProcFsExePath(),
+                    settings.getPciLeechArguments().trim()
+            );
+            pb.redirectInput(ProcessBuilder.Redirect.PIPE);
+            pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+            pb.redirectErrorStream(true);
+            try {
+                Process p = pb.start();
+                server = new RunningServer(p);
+                _server.set(server);
+                server.addListener(this);
+                server.start();
+                updateServerState();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            server.shutdownNow();
+            _startStopButton.setEnabled(false);
+        }
     }
 
     private static void enableContainer(Container container, boolean enabled) {
@@ -202,9 +207,13 @@ public class MainFrame extends JFrame implements RunningServerListener {
         if (_server.get() == null) {
             enableContainer(_settingsPanel, true);
             _startStopButton.setText("Start Server");
+            _startStopButton.setForeground(Color.WHITE);
+            _startStopButton.setBackground(Color.GREEN.darker());
         } else {
             enableContainer(_settingsPanel, false);
             _startStopButton.setText("Stop Server");
+            _startStopButton.setForeground(Color.WHITE);
+            _startStopButton.setBackground(Color.RED.darker());
         }
     }
 
