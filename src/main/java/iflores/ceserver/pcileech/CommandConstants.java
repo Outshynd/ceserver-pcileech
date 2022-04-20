@@ -48,6 +48,7 @@ public interface CommandConstants {
 
     byte CMD_VIRTUALQUERYEXFULL = 31;
     byte CMD_GETREGIONINFO = 32;
+    byte CMD_GETABI = 33;
 
 //    byte CMD_AOBSCAN = (byte) 200;
 

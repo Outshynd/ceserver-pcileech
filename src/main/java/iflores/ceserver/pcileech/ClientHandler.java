@@ -115,6 +115,12 @@ public class ClientHandler extends Thread {
                 writeFully(result);
                 break;
             }
+            case CMD_GETABI: {
+                ByteBuffer result = ByteBuffer.allocate(1);
+                result.order(ByteOrder.LITTLE_ENDIAN);
+                writeFully(result);
+                break;
+            }
             case CMD_CREATETOOLHELP32SNAPSHOT: {
                 int dwFlags = readInt();
                 int th32ProcessID = readInt();
@@ -441,10 +447,11 @@ public class ClientHandler extends Thread {
             throw new IllegalArgumentException();
         }
         byte[] moduleNameBytes = moduleName.getBytes(StandardCharsets.UTF_8);
-        ByteBuffer buf = ByteBuffer.allocate(20 + moduleNameBytes.length);
+        ByteBuffer buf = ByteBuffer.allocate(24 + moduleNameBytes.length);
         buf.order(ByteOrder.LITTLE_ENDIAN);
         buf.putInt(hasNext ? 1 : 0);
         buf.putLong(moduleBase);
+        buf.putInt(0); // module "part"
         buf.putInt((int) moduleSize);
         buf.putInt(moduleNameBytes.length);
         buf.put(moduleNameBytes);
