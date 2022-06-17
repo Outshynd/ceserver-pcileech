@@ -24,13 +24,19 @@ public class MemoryMap<T> implements Iterable<MemoryRegion<T>> {
         MemoryRegion<T> previousEntry = _treeSet.floor(newEntry);
         MemoryRegion<T> nextEntry = _treeSet.ceiling(newEntry);
         if (regionOverlaps(newEntry, previousEntry)) {
-            throw new PciLeechException("Overlapping entries: " + newEntry + "/" + previousEntry);
+            System.err.println("WARNING: Overlapping entries: " + newEntry + "/" + previousEntry);
         }
         if (regionOverlaps(newEntry, nextEntry)) {
-            throw new PciLeechException("Overlapping entries: " + nextEntry + "/" + newEntry);
+            System.err.println("WARNING: Overlapping entries: " + nextEntry + "/" + newEntry);
         }
         if (!_treeSet.add(newEntry)) {
-            throw new PciLeechException("Duplicate memory range: " + newEntry);
+            MemoryRegion<T> existingEntry = _treeSet.floor(newEntry);
+            assert existingEntry != null;
+            System.err.println("WARNING: Duplicate entry: " + existingEntry + "/" + newEntry);
+            if (newEntry.getRegionSize() > existingEntry.getRegionSize()) {
+                _treeSet.remove(existingEntry);
+                _treeSet.add(newEntry);
+            }
         }
     }
 
